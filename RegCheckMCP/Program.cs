@@ -6,7 +6,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("regcheck");
 
 builder.Services.AddMcpServer()
-    .WithHttpTransport()
+    .WithHttpTransport(options => options.Stateless = true)
     .WithTools<VehicleLookupTools>();
 
 var app = builder.Build();

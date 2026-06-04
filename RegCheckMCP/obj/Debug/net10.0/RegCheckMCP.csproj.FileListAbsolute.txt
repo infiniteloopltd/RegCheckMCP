@@ -33,3 +33,4 @@ C:\projects\RegCheckMCP\RegCheckMCP\obj\Debug\net10.0\refint\RegCheckMCP.dll
 C:\projects\RegCheckMCP\RegCheckMCP\obj\Debug\net10.0\RegCheckMCP.pdb
 C:\projects\RegCheckMCP\RegCheckMCP\obj\Debug\net10.0\RegCheckMCP.genruntimeconfig.cache
 C:\projects\RegCheckMCP\RegCheckMCP\obj\Debug\net10.0\ref\RegCheckMCP.dll
+C:\projects\RegCheckMCP\RegCheckMCP\obj\Debug\net10.0\RegCheckMCP.sourcelink.json

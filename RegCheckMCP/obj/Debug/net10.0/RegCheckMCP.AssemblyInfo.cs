@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RegCheckMCP")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7ea9fd69d1d91bcda7694254a2bc70c8672f5d2c")]
 [assembly: System.Reflection.AssemblyProductAttribute("RegCheckMCP")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RegCheckMCP")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
