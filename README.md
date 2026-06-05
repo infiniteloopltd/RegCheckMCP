@@ -142,6 +142,141 @@ gcloud run deploy regcheckmcp \\
 
 \---
 
+## OAuth 2.1 + PKCE Authentication
+
+The RegCheck MCP Server implements OAuth 2.1 with PKCE (Proof Key for Code Exchange) for secure,
+stateless authentication. All signing is done with HMAC-SHA256; no server-side session state is required,
+making it suitable for stateless hosting environments such as Google Cloud Run.
+
+---
+
+### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/authorize` | Starts the OAuth flow; validates PKCE params and redirects to the login page |
+| `GET` | `/login` | Serves the login page with an embedded signed session token |
+| `POST` | `/login` | Accepts credentials, verifies them, issues a signed auth code and redirects to the client |
+| `POST` | `/token` | Exchanges an auth code + code verifier for a Bearer access token |
+| `*` | `/mcp` | MCP transport endpoint; requires a valid Bearer token or X-Api-Key header |
+
+---
+
+### Flow Overview
+
+```
+Client                        RegCheck MCP Server
+  |                                  |
+  |-- GET /authorize                 |
+  |   ?response_type=code            |
+  |   &client_id=...                 |
+  |   &redirect_uri=...              |
+  |   &code_challenge=...            |  <- SHA-256(code_verifier)
+  |   &code_challenge_method=S256    |
+  |   &state=...                     |
+  |                                  |
+  |        302 -> /login             |
+  |            ?session_token=...    |  <- signed token carrying PKCE state
+  |<---------------------------------|
+  |                                  |
+  |-- POST /login                    |
+  |   username + password            |
+  |   + session_token (hidden field) |
+  |                                  |
+  |        302 -> redirect_uri       |
+  |            ?code=...             |  <- short-lived signed auth code
+  |            &state=...            |
+  |<---------------------------------|
+  |                                  |
+  |-- POST /token                    |
+  |   code + code_verifier           |  <- proves client holds the original secret
+  |                                  |
+  |        200 { access_token }      |  <- Bearer token, valid 1 hour
+  |<---------------------------------|
+  |                                  |
+  |-- POST /mcp                      |
+  |   Authorization: Bearer ...      |
+  |<---------------------------------|
+```
+
+---
+
+### Secrets Configuration
+
+Signing secrets are stored in an embedded resource file that is excluded from source control.
+
+**1. Copy the example file:**
+
+```
+cp RegCheckMCP/Resources/secrets.json.example RegCheckMCP/Resources/secrets.json
+```
+
+**2. Edit `secrets.json` and fill in your own values:**
+
+```json
+{
+  "SessionSigningKey": "...",
+  "AuthCodeSigningKey": "..."
+}
+```
+
+- **SessionSigningKey** — used to sign session tokens (issued at `/authorize`) and Bearer access tokens
+  (issued at `/token`). Minimum 32 characters, cryptographically random.
+- **AuthCodeSigningKey** — used to sign the short-lived authorization codes issued after successful
+  login. Should be different from `SessionSigningKey`.
+
+**3.** `secrets.json` is listed in `.gitignore` and will never be committed. Only `secrets.json.example`
+is tracked.
+
+> **Generating secure keys** — in PowerShell:
+> ```powershell
+> [Convert]::ToBase64String((1..32 | ForEach-Object { [byte](Get-Random -Max 256) }))
+> ```
+> Run this twice to get two independent keys.
+
+---
+
+### Token Lifetimes
+
+| Token | Lifetime | Notes |
+|-------|----------|-------|
+| Session token | 10 minutes | Time allowed to complete the login form after `/authorize` |
+| Auth code | 60 seconds | Must be exchanged at `/token` promptly after redirect |
+| Access token | 1 hour | Sent as `Authorization: Bearer` on MCP requests |
+
+---
+
+### Credential Validation
+
+User credentials are validated against the RegCheck API. To create or manage your account visit
+[regcheck.org.uk](https://www.regcheck.org.uk/).
+
+---
+
+### Legacy API Key Support
+
+The MCP endpoint also accepts the legacy `X-Api-Key` header for backwards compatibility with existing
+integrations. Bearer token authentication is preferred for new clients.
+
+```http
+X-Api-Key: your-username
+```
+
+---
+
+### Security Notes
+
+- PKCE is **required** — the server rejects any authorization request that omits `code_challenge` or
+  uses a method other than `S256`.
+- Auth codes are **single-use by design** — they expire after 60 seconds and are HMAC-signed, so
+  replaying a captured code will fail.
+- All tokens are **stateless** — the server can be restarted or scaled horizontally without
+  invalidating existing tokens, provided the signing keys in `secrets.json` remain unchanged.
+- Secrets are **embedded at build time** — they are compiled into the assembly and never read from
+  disk or environment variables at runtime.
+- Bearer tokens encode `username:clientId:expiry` and are verified with HMAC-SHA256 on every
+  request before the username is trusted.
+
 ## License
 
 MIT
