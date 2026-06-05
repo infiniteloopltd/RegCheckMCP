@@ -87,13 +87,14 @@ public class VehicleLookupTools
 
 
 
-    [McpServerTool(Name = "lookup_vehicle")]
+    [McpServerTool(Name = "lookup_vehicle", Title = "Look up vehicle by registration", ReadOnly = true)]
     [Description(
         "Look up a vehicle registration plate for any supported country. " +
         "Supported country codes: AE, AR, AT, AU, BO, BR, CA, CH, CL, CN, CO, CR, CY, CZ, DE, DK, " +
         "EC, EE, ES, FI, FR, GR, GB, HR, HU, ID, IE, IL, IN, IS, IT, KZ, LK, LT, LV, MT, MX, MY, NG, " +
         "NL, NO, NZ, OM, PE, PK, PL, PT, RO, RU, SE, SG, SI, SK, TN, TW, UA, US, ZA. " +
         "For AU, CA, US and PK a state code is also required, e.g. 'NSW', 'ON', 'NC'.")]
+
     public async Task<string> LookupVehicle(
         [Description("Vehicle registration plate number.")]
         string registration,
@@ -117,11 +118,25 @@ public class VehicleLookupTools
 
     private async Task<string> CallEndpoint(string endpoint, string registration, string? state)
     {
+        var httpContext = _httpContextAccessor.HttpContext;
+
+        Console.WriteLine($"[AUTH] HttpContext is null: {httpContext is null}");
+
+        if (httpContext is not null)
+        {
+            foreach (var header in httpContext.Request.Headers)
+                Console.WriteLine($"[AUTH] Header: {header.Key} = {header.Value}");
+        }
+
+        var authHeader = httpContext?.Request.Headers["Authorization"].FirstOrDefault();
+        var apiKey = httpContext?.Request.Headers["X-Api-Key"].FirstOrDefault();
+
+        Console.WriteLine($"[AUTH] authHeader='{authHeader}' apiKey='{apiKey}'");
+
 
         string? username = null;
 
-        var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
-        var apiKey = _httpContextAccessor.HttpContext?.Request.Headers["X-Api-Key"].FirstOrDefault();
+  
 
         if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         {
