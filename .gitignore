@@ -1,6 +1,15 @@
+
+# OAuth signing secrets - never commit
+RegCheckMCP/Resources/secrets.json
+
+
 # Build output
+
 bin/
 obj/
+RegCheckMCP/bin/
+RegCheckMCP/obj/
+
 
 # Visual Studio
 .vs/

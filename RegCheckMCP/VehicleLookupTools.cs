@@ -2,6 +2,7 @@
 
 using System.ComponentModel;
 using System.Xml.Linq;
+using RegCheckMCP.Auth;
 
 [McpServerToolType]
 public class VehicleLookupTools
@@ -117,10 +118,31 @@ public class VehicleLookupTools
     private async Task<string> CallEndpoint(string endpoint, string registration, string? state)
     {
 
+        string? username = null;
+
+        var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
         var apiKey = _httpContextAccessor.HttpContext?.Request.Headers["X-Api-Key"].FirstOrDefault();
 
-        if (string.IsNullOrWhiteSpace(apiKey))
-            return "Error: No API key provided. Please connect with an X-Api-Key header.";
+        if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            // OAuth path — extract username from access token
+            var token = authHeader["Bearer ".Length..].Trim();
+            var (extractedUsername, _) = AccessToken.DecodeAccessToken(token);
+
+            if (extractedUsername is null)
+                return "Error: Invalid or expired Bearer token.";
+
+            username = extractedUsername;
+        }
+        else if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            // Legacy path — API key is the username
+            username = apiKey;
+        }
+        else
+        {
+            return "Error: No credentials provided. Supply either an Authorization: Bearer token or X-Api-Key header.";
+        }
 
         var plate = Uri.EscapeDataString(registration.Trim());
         var url = $"https://www.regcheck.org.uk/api/reg.asmx/{endpoint}" +

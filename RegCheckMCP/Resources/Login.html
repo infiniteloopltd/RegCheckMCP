@@ -1,0 +1,440 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RegCheck MCP Server — Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0c0f14;
+            --surface: #13181f;
+            --surface2: #1b2330;
+            --border: rgba(255,255,255,0.07);
+            --border-hi: rgba(255,255,255,0.14);
+            --accent: #00c896;
+            --accent-dim: rgba(0,200,150,0.12);
+            --accent-glow: rgba(0,200,150,0.25);
+            --text: #e8edf3;
+            --muted: #8b95a1;
+            --danger: #e2533a;
+            --mono: 'DM Mono', monospace;
+            --sans: 'Sora', sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+            /* Background grid */
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-image: linear-gradient(rgba(0,200,150,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,150,0.03) 1px, transparent 1px);
+                background-size: 40px 40px;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            /* Radial glow behind card */
+            body::after {
+                content: '';
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -60%);
+                width: 600px;
+                height: 600px;
+                background: radial-gradient(circle, rgba(0,200,150,0.07) 0%, transparent 70%);
+                pointer-events: none;
+                z-index: 0;
+            }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            background: var(--surface);
+            border: 1px solid var(--border-hi);
+            border-radius: 16px;
+            padding: 2.5rem 2.25rem 2rem;
+            animation: rise 0.45s cubic-bezier(0.22,1,0.36,1) both;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Top accent bar */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 2rem;
+            right: 2rem;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 0 0 2px 2px;
+        }
+
+        /* Logo / wordmark */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(0,200,150,0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+            .brand-icon svg {
+                width: 18px;
+                height: 18px;
+                fill: none;
+                stroke: var(--accent);
+                stroke-width: 1.8;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+
+        .brand-text {
+            line-height: 1.15;
+        }
+
+        .brand-name {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            color: var(--text);
+        }
+
+        .brand-sub {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--accent);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        /* Heading */
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        /* Form */
+        .field {
+            margin-bottom: 1.1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.45rem;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            height: 44px;
+            background: var(--surface2);
+            border: 1px solid var(--border-hi);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 14px;
+            padding: 0 0.9rem;
+            outline: none;
+            transition: border-color 0.18s, box-shadow 0.18s;
+            -webkit-appearance: none;
+        }
+
+        input::placeholder {
+            color: rgba(139,149,161,0.45);
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+            input:focus + .field-glow {
+                opacity: 1;
+            }
+
+        /* Submit button */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            height: 46px;
+            margin-top: 1.6rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: #051a14;
+            font-family: var(--sans);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.12s;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .btn::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: rgba(255,255,255,0.08);
+                opacity: 0;
+                transition: opacity 0.15s;
+            }
+
+            .btn:hover::after {
+                opacity: 1;
+            }
+
+            .btn:active {
+                transform: scale(0.98);
+            }
+
+            .btn svg {
+                width: 15px;
+                height: 15px;
+                fill: none;
+                stroke: #051a14;
+                stroke-width: 2;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                flex-shrink: 0;
+            }
+
+        /* Error message placeholder */
+        .error-msg {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(226,83,58,0.1);
+            border: 1px solid rgba(226,83,58,0.25);
+            border-radius: 8px;
+            padding: 0.6rem 0.85rem;
+            font-size: 13px;
+            color: #f2836d;
+            margin-bottom: 1.1rem;
+        }
+
+            .error-msg.visible {
+                display: flex;
+            }
+
+            .error-msg svg {
+                width: 15px;
+                height: 15px;
+                fill: none;
+                stroke: #f2836d;
+                stroke-width: 2;
+                stroke-linecap: round;
+                flex-shrink: 0;
+            }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.75rem 0 1.25rem;
+            color: var(--border-hi);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+
+            .divider::before,
+            .divider::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: var(--border);
+            }
+
+        /* Footer link */
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+            .footer a {
+                color: var(--accent);
+                text-decoration: none;
+                font-weight: 600;
+                transition: opacity 0.15s;
+            }
+
+                .footer a:hover {
+                    opacity: 0.75;
+                }
+
+        /* Subtle version badge */
+        .version-badge {
+            position: absolute;
+            bottom: -1px;
+            right: 1.5rem;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            background: var(--surface);
+            padding: 2px 8px;
+            border-radius: 6px 6px 0 0;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            letter-spacing: 0.06em;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+
+        <div class="brand">
+            <div class="brand-icon">
+                <!-- car / plate icon -->
+                <svg viewBox="0 0 24 24">
+                    <rect x="2" y="8" width="20" height="10" rx="2" />
+                    <path d="M5 8l2-4h10l2 4" />
+                    <circle cx="7" cy="18" r="1.5" />
+                    <circle cx="17" cy="18" r="1.5" />
+                    <rect x="7" y="11" width="10" height="4" rx="1" />
+                </svg>
+            </div>
+            <div class="brand-text">
+                <div class="brand-name">RegCheck</div>
+                <div class="brand-sub">MCP Server</div>
+            </div>
+        </div>
+
+        <h1>Sign in</h1>
+        <p class="subtitle">Access the vehicle registration lookup API</p>
+
+        <div class="error-msg" id="errorMsg">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            <span id="errorText">Invalid credentials. Please try again.</span>
+        </div>
+
+        <form method="POST" action="/login" id="loginForm" novalidate>
+
+            <div class="field">
+                <label for="username">Username or email</label>
+                <input type="text" id="username" name="username" placeholder="you@example.com" autocomplete="username" spellcheck="false" required />
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                <span>Sign in</span>
+                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+            </button>
+
+        </form>
+
+        <div class="divider">or</div>
+
+        <div class="footer">
+            No account?&nbsp;
+            <a href="https://www.regcheck.org.uk/" target="_blank" rel="noopener">Sign up at regcheck.org.uk ↗</a>
+        </div>
+
+        <div class="version-badge">OAuth 2.1 · PKCE</div>
+
+    </div>
+
+    <script>
+  const form = document.getElementById('loginForm');
+  const errorMsg = document.getElementById('errorMsg');
+  const errorText = document.getElementById('errorText');
+  const submitBtn = document.getElementById('submitBtn');
+
+  // Show error if query param ?error=1 is present
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('error')) {
+    const msg = params.get('error');
+    errorText.textContent = msg === 'invalid' ? 'Invalid credentials. Please try again.'
+                          : msg === 'expired'  ? 'Session expired. Please sign in again.'
+                          : 'Something went wrong. Please try again.';
+    errorMsg.classList.add('visible');
+  }
+
+  form.addEventListener('submit', function () {
+    submitBtn.textContent = 'Signing in…';
+    submitBtn.disabled = true;
+  });
+    </script>
+
+</body>
+</html>

@@ -1,5 +1,7 @@
 
 
+using RegCheckMcp.Auth;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
@@ -11,8 +13,12 @@ builder.Services.AddMcpServer()
 
 var app = builder.Build();
 
-// Read the API key from the header at connection time and stash it in the scoped service
 
+
+app.MapGet("/authorize", (HttpContext ctx) => AuthHandlers.Authorize(ctx));
+app.MapGet("/login", (HttpContext ctx) => AuthHandlers.LoginPage(ctx));
+app.MapPost("/login", async (HttpContext ctx) => await AuthHandlers.LoginPost(ctx));
+app.MapPost("/token", async (HttpContext ctx) => await AuthHandlers.Token(ctx));
 
 app.MapMcp("/mcp");
 
