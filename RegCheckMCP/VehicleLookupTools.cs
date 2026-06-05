@@ -146,7 +146,7 @@ public class VehicleLookupTools
 
         var plate = Uri.EscapeDataString(registration.Trim());
         var url = $"https://www.regcheck.org.uk/api/reg.asmx/{endpoint}" +
-                  $"?RegistrationNumber={plate}&username={apiKey}";
+                  $"?RegistrationNumber={plate}&username={username}";
 
         if (!string.IsNullOrWhiteSpace(state))
             url += $"&State={Uri.EscapeDataString(state.Trim())}";
