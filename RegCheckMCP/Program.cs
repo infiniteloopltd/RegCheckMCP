@@ -1,6 +1,7 @@
 
 
 using System.Text.Json;
+using ModelContextProtocol.Protocol;
 using RegCheckMcp.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,26 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddMcpServer()
+builder.Services.AddMcpServer(options => {
+    options.ServerInfo = new Implementation
+    {
+        Name = "RegCheck",
+        Version = "1.0.0",
+        Title = "RegCheck Vehicle Lookup",
+        Description = "Vehicle registration lookup across 50+ countries",
+        WebsiteUrl = "https://www.regcheck.org.uk",
+        Icons =
+        [
+            new Icon
+            {
+                Source   = "https://regcheck.org.uk/assets/ico/favicon.png",
+                MimeType = "image/png",
+                Sizes    = ["97x97"],
+                Theme    = "light"
+            }
+        ]
+    };
+})
     .WithHttpTransport(options => options.Stateless = true)
     .WithTools<VehicleLookupTools>();
 

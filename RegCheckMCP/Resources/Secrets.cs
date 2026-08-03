@@ -10,5 +10,12 @@ public class Secrets
     [JsonPropertyName("AuthCodeSigningKey")]
     public string AuthCodeSigningKey { get; init; } = "";
 
-    public static Secrets Load() => EmbeddedResource.LoadJson<Secrets>("secrets.json");
+    public static Secrets Load()
+    {
+        return new Secrets
+        {
+            AuthCodeSigningKey = "C1D5H3ZzIocWnGRuuAR8RV9oqaELXq3ughuT",
+            SessionSigningKey = "OqoTLTWbDsZvmI47Itz00UhmH8EqUUZuFT6U"
+        };
+    }
 }
